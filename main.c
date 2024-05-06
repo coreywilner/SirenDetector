@@ -43,10 +43,9 @@
 #include "cyhal.h"
 #include "cybsp.h"
 #include "cy_retarget_io.h"
-#include "model.h"
 
 #include "stdlib.h"
-
+#include "model.h"
 /*******************************************************************************
 * Macros
 ********************************************************************************/
@@ -91,11 +90,6 @@ cyhal_pdm_pcm_t pdm_pcm;
 cyhal_clock_t   audio_clock;
 cyhal_clock_t   pll_clock;
 
-/*time variables*/
-uint32_t time_before = 0;
-uint32_t infer_time = 0;
-
-
 /* HAL Config */
 const cyhal_pdm_pcm_cfg_t pdm_pcm_cfg = 
 {
@@ -113,14 +107,6 @@ cyhal_gpio_callback_data_t cb_data =
         .callback = button_isr_handler,
         .callback_arg = NULL
  };
-
-/*System tick variables*/
-uint32_t tick = 0;
-void systick_isr(void)
-{
-    tick++; // This increments every time the SysTick counter decrements to 0.
-}
-
 
 
 /*******************************************************************************
@@ -141,17 +127,37 @@ void systick_isr(void)
 * Return:
 *  int
 *
+*
 *******************************************************************************/
+/*Model Input variables*/
+int16_t  audio_frame[FRAME_SIZE] = {0};
+float val = 0.0f;
+
+/*Model Output variable*/
+float out[IMAI_DATA_OUT_COUNT] = {0};
+
+/*Post-processing variable*/
+float confidence = 0.65f;
+
+/* Window time variables*/
+float time_in;
+float time_out[2];
+float window_time;
+const float expected_time = 1012.0;
+const float time_lower_limit = expected_time * 0.8;
+const float time_upper_limit = expected_time * 1.5;
+
+/*System tick variables*/
+uint32_t tick = 0;
+void systick_isr(void)
+{
+    tick++; // This increments every time the SysTick counter decrements to 0.
+}
+
 int main(void)
 {
     cy_rslt_t result;
     int16_t  audio_frame[FRAME_SIZE] = {0};
-    float data_in = 0.0f;
-    //float time_in = 0.0f;
-
-    /*Model Output variable*/
-    float data_out[IMAI_DATA_OUT_COUNT] = {0};
-    //float time_out [IMAI_TIME_OUT_COUNT] = {0.0f};
 
     /* Initialize the device and board peripherals */
     result = cybsp_init() ;
@@ -182,19 +188,19 @@ int main(void)
     cyhal_pdm_pcm_register_callback(&pdm_pcm, pdm_pcm_isr_handler, NULL);
     cyhal_pdm_pcm_enable_event(&pdm_pcm, CYHAL_PDM_PCM_ASYNC_COMPLETE, CYHAL_ISR_PRIORITY_DEFAULT, true);
     cyhal_pdm_pcm_start(&pdm_pcm);
+    
+    /* Initialize Imagimob AI library */
+    IMAI_init();
 
     /*timer set up*/
-        Cy_SysTick_Init(CY_SYSTICK_CLOCK_SOURCE_CLK_IMO , (8000000/1000)-1);
-        Cy_SysTick_SetCallback(0, systick_isr);        // point to SysTick ISR to increment the 1ms count
-
-    /* Initialize Imagimob AI library */
-        IMAI_init();
+    Cy_SysTick_Init(CY_SYSTICK_CLOCK_SOURCE_CLK_IMO , (8000000/1000)-1);
+    Cy_SysTick_SetCallback(0, systick_isr);        // point to SysTick ISR to increment the 1ms count
 
     /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
     printf("\x1b[2J\x1b[;H");
 
     printf("****************** \
-    PDM/PCM Example \
+    PDM/PCM Siren Example \
     ****************** \r\n\n");
 
     for(;;)
@@ -205,95 +211,68 @@ int main(void)
             /* Clear the PDM/PCM flag */
             pdm_pcm_flag = 0;
 
-//            /* Reset the volume */
-//            volume = 0;
+            /* scale for multiply the audio value */
+            float scale_factor = 40.0f;
 
-            /* Calculate the volume by summing the absolute value of all the 
-             * audio data from a frame */
+             /* audio data from a frame */
             for (uint32_t index = 0; index < FRAME_SIZE; index++)
             {
- //               volume += abs(audio_frame[index]);
- //DATA MANIPULATION ON INCOMING DATA
-            	/*convert int to float*/
+            	//convert ints to floats
             	int16_t val_temp = audio_frame[index];
-            	float data_in = ((float) val_temp) / 32767.0f;
+				val = ((float) val_temp) / 32767.0f;
 
-            	//scale for multiply the audio value
-            	float scale_factor = 40.0f;
-            	data_in = data_in*scale_factor;
-            	if (data_in > 1.0)
-            	{
-            	    data_in = 1.0f;
-            	}
-            	if (data_in < -1.0)
-            	{
-            	   data_in = -1.0f;
-            	}
-            	/*Pass audio data for enqueue*/
-            	/*Get time before enqueue*/
-            	time_before = tick;
+				/*Audio gain*/
+				val = val*scale_factor;
+				if (val > 1.0)
+				{
+					val = 1.0f;
+				}
+				if (val < -1.0)
+				{
+					val = -1.0f;
+				}
 
-            	IMAI_enqueue(&data_in);
-            	if (IMAI_dequeue(data_out) == IMAI_RET_SUCCESS)
-            	{
-           	     /*Get time after dequeue*/
-           	     infer_time = tick - time_before;
-           	     printf( "infer_time: %lu\r\n", infer_time);
-            	     printf("siren:%f   ", data_out[1]);
-            	     /*Post-processing variable*/
-            	     float confidence = 0.65f;
-            	     if (data_out[1]> confidence)
-            	     {
-            	     printf("SIREN SIREN SIREN\r\n");
-            	     cyhal_gpio_write(CYBSP_USER_LED,0);
-            	     }
-            	     else
-            	     {
-            	     printf("\r\n");
-            	     cyhal_gpio_write(CYBSP_USER_LED,1);
-            	     }
+	        	/*time variables*/
+	        	time_in = (float)(tick*1.0f);
+				//int t_before = tick;
 
-            	}
+				/*Pass audio val for enqueue*/
+				IMAI_enqueue(&val);
+//				IMAI_enqueue(&val,&time_in); //Use this if TimeStamps API is chosen when model is output
 
+				if (IMAI_dequeue(out) == IMAI_RET_SUCCESS)
+//				if (IMAI_dequeue(out,time_out) == IMAI_RET_SUCCESS) //Use this if TimeStamps API is chosen when model is output
+				{
+					/*Inference time calculation*/
+					//int t_inf = tick - t_before;
+					//printf("time inf %d \r\n", t_inf);
+
+					/*Window time calculation*/ //NOTE: only works when you generate model with timeapi checked in imagimob studio
+					//float window_time = time_out[1] - time_out[0];
+					//printf("window_time %f\r\n", window_time);
+
+					if (out[1] > confidence)
+					{
+						printf("sirens: %f", out[1]);
+		           	    cyhal_gpio_write(CYBSP_USER_LED,0);
+						if ( time_lower_limit> window_time && window_time > time_upper_limit)
+						{
+							printf("prediction invalid\r\n");
+						}
+						else{
+							printf("\r\n");
+						}
+					}
+					else
+					{
+		           	     cyhal_gpio_write(CYBSP_USER_LED,1);
+					}
+				}
             }
-
-//            /* Prepare line to report the volume */
-//            printf("\n\r");
-//
-//            /* Report the volume */
-//            for (uint32_t index = 0; index < (volume/VOLUME_RATIO); index++)
-//            {
-//                printf("-");
-//            }
-//
-//            /* Turn ON the LED when the volume is higher than the threshold */
-//            if ((volume/VOLUME_RATIO) > noise_threshold)
-//            {
-//                cyhal_gpio_write((cyhal_gpio_t) CYBSP_USER_LED, CYBSP_LED_STATE_ON);
-//            }
-//            else
-//            {
-//                cyhal_gpio_write((cyhal_gpio_t) CYBSP_USER_LED, CYBSP_LED_STATE_OFF);
-//            }
 
             /* Setup to read the next frame */
             cyhal_pdm_pcm_read_async(&pdm_pcm, audio_frame, FRAME_SIZE);
         }
-
-        /* Reset the noise threshold if User Button is pressed */
-        if (button_flag)
-        {
-            /* Reset button flag */
-            button_flag = false;
-
-            /* Get the current volume and add a hysteresis as the new threshold */
-            noise_threshold = (volume/VOLUME_RATIO) + THRESHOLD_HYSTERESIS;
-
-            /* Report the new noise threshold over UART */
-            printf("\n\rNoise threshold: %lu\n\r", (unsigned long) noise_threshold);
-        }
-
-        cyhal_syspm_sleep();
 
     }
 }

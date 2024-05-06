@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>PDM_PCM_Audio</name>
+	<name>SirenDetector</name>
 	<comment></comment>
 	<projects>
 		<project>mtb_shared</project>
