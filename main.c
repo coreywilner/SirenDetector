@@ -233,23 +233,23 @@ int main(void)
 				}
 
 	        	/*time variables*/
-	        	time_in = (float)(tick*1.0f);
-				//int t_before = tick;
+	        	time_in = (float)(tick*1.0f); //ticks are in 1ms intervals
+				int t_before = tick;
 
 				/*Pass audio val for enqueue*/
-				IMAI_enqueue(&val);
-//				IMAI_enqueue(&val,&time_in); //Use this if TimeStamps API is chosen when model is output
+//				IMAI_enqueue(&val);
+				IMAI_enqueue(&val,&time_in); //Use this if TimeStamps API is chosen when model is output
 
-				if (IMAI_dequeue(out) == IMAI_RET_SUCCESS)
-//				if (IMAI_dequeue(out,time_out) == IMAI_RET_SUCCESS) //Use this if TimeStamps API is chosen when model is output
+//				if (IMAI_dequeue(out) == IMAI_RET_SUCCESS)
+				if (IMAI_dequeue(out,time_out) == IMAI_RET_SUCCESS) //Use this if TimeStamps API is chosen when model is output
 				{
 					/*Inference time calculation*/
-					//int t_inf = tick - t_before;
-					//printf("time inf %d \r\n", t_inf);
+					int t_inf = tick - t_before;
+					printf("time inf %d ms \r\n", t_inf);
 
 					/*Window time calculation*/ //NOTE: only works when you generate model with timeapi checked in imagimob studio
-					//float window_time = time_out[1] - time_out[0];
-					//printf("window_time %f\r\n", window_time);
+					float window_time = time_out[1] - time_out[0];
+					printf("window_time %.1f us\r\n", window_time);
 
 					if (out[1] > confidence)
 					{

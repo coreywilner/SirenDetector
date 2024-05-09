@@ -1,15 +1,15 @@
 /*
-* Imagimob Studio 4.5.1153+f2b6b644f10da1e7a7be145bf57f29909d5a1b32
+* Imagimob Studio 4.8.1397+ec7f68f457701b125b40ecb6a3e43a64ab83bbf6
 * Copyright © 2023- Imagimob AB, All Rights Reserved.
 * 
-* Generated at 02/08/2024 21:18:04 UTC. Any changes will be lost.
+* Generated at 05/09/2024 21:44:12 UTC. Any changes will be lost.
 * 
-* Model ID  44571126-2772-47d2-a65a-6465419074a7
+* Model ID  eba2fca1-1a79-4555-808a-a2260d43bc84
 * 
 * Memory    Size                      Efficiency
 * Buffers   7248 bytes (RAM)          100 %
-* State     9592 bytes (RAM)          100 %
-* Readonly  34756 bytes (Flash)       100 %
+* State     14088 bytes (RAM)         100 %
+* Readonly  34500 bytes (Flash)       100 %
 * 
 * Backend              tensorflow
 * Keras Version        2.15.0
@@ -180,13 +180,15 @@
 * 
 * Exported functions:
 * 
-* int IMAI_dequeue(float *restrict data_out)
+* int IMAI_dequeue(float *restrict data_out, float *restrict time_out)
 *    Description: Dequeue features. RET_SUCCESS (0) on success, RET_NODATA (-1) if no data is available, RET_NOMEM (-2) on internal memory error
 *    Parameter data_out is Output of size float[2].
+*    Parameter time_out is Output of size float[2].
 * 
-* int IMAI_enqueue(const float *restrict data_in)
+* int IMAI_enqueue(const float *restrict data_in, const float *restrict time_in)
 *    Description: Enqueue features. Returns SUCCESS (0) on success, else RET_NOMEM (-2) when low on memory.
 *    Parameter data_in is Input of size float[1].
+*    Parameter time_in is Input of size float[1].
 * 
 * void IMAI_init(void)
 *    Description: Initializes buffers to initial state. This function also works as a reset function.
@@ -200,8 +202,8 @@
 *   tl;dr Compile using gcc with -O3 or -Ofast
 */
 
-#ifndef _IMAI_CONV1D_M_B_1_H_
-#define _IMAI_CONV1D_M_B_1_H_
+#ifndef _IMAI_MODEL_H_
+#define _IMAI_MODEL_H_
 #ifdef _MSC_VER
 #pragma once
 #endif
@@ -228,32 +230,32 @@ typedef struct {
 /*
 * Tensorflow Train Set
 * 
-* (ACC) Accuracy 88.936 %
-* (F1S) F1 Score 88.916 %
+* (ACC) Accuracy 89.179 %
+* (F1S) F1 Score 89.197 %
 * 
 * Name of class                                            (unlabelled)           sirens
-* (TP) True Positive or Correct Positive Prediction               46013            30732
-* (FN) False Negative or Incorrect Negative Prediction             4329             5218
-* (FP) False Positive or Incorrect Positive Prediction             5218             4329
-* (TN) True Negative or Correct Negative Prediction               30732            46013
-* (TPR) True Positive Rate or Sensitivity, Recall               91.40 %          85.49 %
-* (TNR) True Negative Rate or Specificity, Selectivity          85.49 %          91.40 %
-* (PPV) Positive Predictive Value or Precision                  89.81 %          87.65 %
-* (NPV) Negative Predictive Value                               87.65 %          89.81 %
-* (FNR) False Negative Rate or Miss Rate                         8.60 %          14.51 %
-* (FPR) False Positive Rate or Fall-Out                         14.51 %           8.60 %
-* (FDR) False Discovery Rate                                    10.19 %          12.35 %
-* (FOR) False Omission Rate                                     12.35 %          10.19 %
-* (F1S) F1 Score                                                90.60 %          86.56 %
+* (TP) True Positive or Correct Positive Prediction               45186            31677
+* (FN) False Negative or Incorrect Negative Prediction             5128             4199
+* (FP) False Positive or Incorrect Positive Prediction             4199             5128
+* (TN) True Negative or Correct Negative Prediction               31677            45186
+* (TPR) True Positive Rate or Sensitivity, Recall               89.81 %          88.30 %
+* (TNR) True Negative Rate or Specificity, Selectivity          88.30 %          89.81 %
+* (PPV) Positive Predictive Value or Precision                  91.50 %          86.07 %
+* (NPV) Negative Predictive Value                               86.07 %          91.50 %
+* (FNR) False Negative Rate or Miss Rate                        10.19 %          11.70 %
+* (FPR) False Positive Rate or Fall-Out                         11.70 %          10.19 %
+* (FDR) False Discovery Rate                                     8.50 %          13.93 %
+* (FOR) False Omission Rate                                     13.93 %           8.50 %
+* (F1S) F1 Score                                                90.64 %          87.17 %
 */
 
 
-#define IMAI_TRAIN_AVG_ACC 0.8893640198396143 // Accuracy
-#define IMAI_TRAIN_AVG_F1S 0.8891556446460877 // F1 Score
+#define IMAI_TRAIN_AVG_ACC 0.8917855899756352 // Accuracy
+#define IMAI_TRAIN_AVG_F1S 0.8919730084142399 // F1 Score
 
 #define IMAI_TRAIN_STATS { \
- {name: "(unlabelled)", TP: 46013, FN: 4329, FP: 5218, TN: 30732, TPR: 0.9140081840212, TNR: 0.8548539638386, PPV: 0.8981476059417, NPV: 0.8765294771968, FNR: 0.0859918159787, FPR: 0.1451460361613, FDR: 0.1018523940582, FOR: 0.1234705228031, F1S: 0.9060084865072, }, \
- {name: "sirens", TP: 30732, FN: 5218, FP: 4329, TN: 46013, TPR: 0.8548539638386, TNR: 0.9140081840212, PPV: 0.8765294771968, NPV: 0.8981476059417, FNR: 0.1451460361613, FPR: 0.0859918159787, FDR: 0.1234705228031, FOR: 0.1018523940582, F1S: 0.8655560406134, }, \
+ {name: "(unlabelled)", TP: 45186, FN: 5128, FP: 4199, TN: 31677, TPR: 0.8980800572405, TNR: 0.8829579663284, PPV: 0.9149741824440, NPV: 0.8606711044695, FNR: 0.1019199427594, FPR: 0.1170420336715, FDR: 0.0850258175559, FOR: 0.1393288955304, F1S: 0.9064484097132, }, \
+ {name: "sirens", TP: 31677, FN: 4199, FP: 5128, TN: 45186, TPR: 0.8829579663284, TNR: 0.8980800572405, PPV: 0.8606711044695, NPV: 0.9149741824440, FNR: 0.1170420336715, FPR: 0.1019199427594, FDR: 0.1393288955304, FOR: 0.0850258175559, F1S: 0.8716721013744, }, \
 }
 
 #ifdef IMAI_STATS_ENABLED
@@ -263,45 +265,45 @@ static const IMAI_stats IMAI_train_stats[] = IMAI_TRAIN_STATS;
 /*
 * Tensorflow Validation Set
 * 
-* (ACC) Accuracy 84.289 %
-* (F1S) F1 Score 84.211 %
+* (ACC) Accuracy 84.806 %
+* (F1S) F1 Score 84.760 %
 * 
 * Name of class                                            (unlabelled)           sirens
-* (TP) True Positive or Correct Positive Prediction               16238            10179
-* (FN) False Negative or Incorrect Negative Prediction             2075             2849
-* (FP) False Positive or Incorrect Positive Prediction             2849             2075
-* (TN) True Negative or Correct Negative Prediction               10179            16238
-* (TPR) True Positive Rate or Sensitivity, Recall               88.67 %          78.13 %
-* (TNR) True Negative Rate or Specificity, Selectivity          78.13 %          88.67 %
-* (PPV) Positive Predictive Value or Precision                  85.07 %          83.07 %
-* (NPV) Negative Predictive Value                               83.07 %          85.07 %
-* (FNR) False Negative Rate or Miss Rate                        11.33 %          21.87 %
-* (FPR) False Positive Rate or Fall-Out                         21.87 %          11.33 %
-* (FDR) False Discovery Rate                                    14.93 %          16.93 %
-* (FOR) False Omission Rate                                     16.93 %          14.93 %
-* (F1S) F1 Score                                                86.83 %          80.52 %
+* (TP) True Positive or Correct Positive Prediction               16178            10401
+* (FN) False Negative or Incorrect Negative Prediction             2135             2627
+* (FP) False Positive or Incorrect Positive Prediction             2627             2135
+* (TN) True Negative or Correct Negative Prediction               10401            16178
+* (TPR) True Positive Rate or Sensitivity, Recall               88.34 %          79.84 %
+* (TNR) True Negative Rate or Specificity, Selectivity          79.84 %          88.34 %
+* (PPV) Positive Predictive Value or Precision                  86.03 %          82.97 %
+* (NPV) Negative Predictive Value                               82.97 %          86.03 %
+* (FNR) False Negative Rate or Miss Rate                        11.66 %          20.16 %
+* (FPR) False Positive Rate or Fall-Out                         20.16 %          11.66 %
+* (FDR) False Discovery Rate                                    13.97 %          17.03 %
+* (FOR) False Omission Rate                                     17.03 %          13.97 %
+* (F1S) F1 Score                                                87.17 %          81.37 %
 */
 
 
-#define IMAI_VALIDATION_AVG_ACC 0.8428895057592292 // Accuracy
-#define IMAI_VALIDATION_AVG_F1S 0.8421102786040167 // F1 Score
+#define IMAI_VALIDATION_AVG_ACC 0.8480584537825852 // Accuracy
+#define IMAI_VALIDATION_AVG_F1S 0.8476033288415806 // F1 Score
 
 #define IMAI_VALIDATION_STATS { \
- {name: "(unlabelled)", TP: 16238, FN: 2075, FP: 2849, TN: 10179, TPR: 0.8866925135149, TNR: 0.7813171630334, PPV: 0.8507361031068, NPV: 0.8306675371307, FNR: 0.1133074864850, FPR: 0.2186828369665, FDR: 0.1492638968931, FOR: 0.1693324628692, F1S: 0.8683422459893, }, \
- {name: "sirens", TP: 10179, FN: 2849, FP: 2075, TN: 16238, TPR: 0.7813171630334, TNR: 0.8866925135149, PPV: 0.8306675371307, NPV: 0.8507361031068, FNR: 0.2186828369665, FPR: 0.1133074864850, FDR: 0.1693324628692, FOR: 0.1492638968931, F1S: 0.8052369274582, }, \
+ {name: "(unlabelled)", TP: 16178, FN: 2135, FP: 2627, TN: 10401, TPR: 0.8834161524600, TNR: 0.7983573840957, PPV: 0.8603031108747, NPV: 0.8296904913848, FNR: 0.1165838475399, FPR: 0.2016426159042, FDR: 0.1396968891252, FOR: 0.1703095086151, F1S: 0.8717064497009, }, \
+ {name: "sirens", TP: 10401, FN: 2627, FP: 2135, TN: 16178, TPR: 0.7983573840957, TNR: 0.8834161524600, PPV: 0.8296904913848, NPV: 0.8603031108747, FNR: 0.2016426159042, FPR: 0.1165838475399, FDR: 0.1703095086151, FOR: 0.1396968891252, F1S: 0.8137224221561, }, \
 }
 
 #ifdef IMAI_STATS_ENABLED
 static const IMAI_stats IMAI_validation_stats[] = IMAI_VALIDATION_STATS;
 #endif
 
-#define IMAI_API_QUEUE
+#define IMAI_API_QUEUE_TIME
 
 // All symbols in order
 #define IMAI_SYMBOL_MAP {"unlabelled", "sirens"}
 
 // Model GUID (16 bytes)
-#define IMAI_MODEL_ID {0x26, 0x11, 0x57, 0x44, 0x72, 0x27, 0xd2, 0x47, 0xa6, 0x5a, 0x64, 0x65, 0x41, 0x90, 0x74, 0xa7}
+#define IMAI_MODEL_ID {0xa1, 0xfc, 0xa2, 0xeb, 0x79, 0x1a, 0x55, 0x45, 0x80, 0x8a, 0xa2, 0x26, 0x0d, 0x43, 0xbc, 0x84}
 
 // First nibble is bit encoding, second nibble is number of bytes
 #define IMAGINET_TYPES_NONE	(0x0)
@@ -323,6 +325,14 @@ static const IMAI_stats IMAI_validation_stats[] = IMAI_VALIDATION_STATS;
 #define IMAI_DATA_IN_OFFSET (0)
 #define IMAI_DATA_IN_IS_QUANTIZED (0)
 
+// time_in [1] (4 bytes)
+#define IMAI_TIME_IN_COUNT (1)
+#define IMAI_TIME_IN_TYPE float
+#define IMAI_TIME_IN_TYPE_ID IMAGINET_TYPES_FLOAT32
+#define IMAI_TIME_IN_SCALE (1)
+#define IMAI_TIME_IN_OFFSET (0)
+#define IMAI_TIME_IN_IS_QUANTIZED (0)
+
 // data_out [2] (8 bytes)
 #define IMAI_DATA_OUT_COUNT (2)
 #define IMAI_DATA_OUT_TYPE float
@@ -331,7 +341,15 @@ static const IMAI_stats IMAI_validation_stats[] = IMAI_VALIDATION_STATS;
 #define IMAI_DATA_OUT_OFFSET (0)
 #define IMAI_DATA_OUT_IS_QUANTIZED (0)
 
-#define IMAI_KEY_MAX (56)
+// time_out [2] (8 bytes)
+#define IMAI_TIME_OUT_COUNT (2)
+#define IMAI_TIME_OUT_TYPE float
+#define IMAI_TIME_OUT_TYPE_ID IMAGINET_TYPES_FLOAT32
+#define IMAI_TIME_OUT_SCALE (1)
+#define IMAI_TIME_OUT_OFFSET (0)
+#define IMAI_TIME_OUT_IS_QUANTIZED (0)
+
+#define IMAI_KEY_MAX (59)
 
 
 
@@ -341,8 +359,8 @@ static const IMAI_stats IMAI_validation_stats[] = IMAI_VALIDATION_STATS;
 #define IMAI_RET_NOMEM -2
 
 // Exported methods
-int IMAI_dequeue(float *restrict data_out);
-int IMAI_enqueue(const float *restrict data_in);
+int IMAI_dequeue(float *restrict data_out, float *restrict time_out);
+int IMAI_enqueue(const float *restrict data_in, const float *restrict time_in);
 void IMAI_init(void);
 
-#endif /* _IMAI_CONV1D_M_B_1_H_ */
+#endif /* _IMAI_MODEL_H_ */
