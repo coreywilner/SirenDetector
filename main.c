@@ -249,7 +249,7 @@ int main(void)
 
 					/*Window time calculation*/ //NOTE: only works when you generate model with timeapi checked in imagimob studio
 					float window_time = time_out[1] - time_out[0];
-					printf("window_time %.1f us\r\n", window_time);
+					printf("window_time %.1f ms\r\n", window_time);
 
 					if (out[1] > confidence)
 					{
