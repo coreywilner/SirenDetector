@@ -254,7 +254,7 @@ int main(void)
 					if (out[1] > confidence)
 					{
 						printf("sirens: %f", out[1]);
-		           	    cyhal_gpio_write(CYBSP_USER_LED,0);
+		           	    cyhal_gpio_write(CYBSP_USER_LED,1);
 						if ( time_lower_limit> window_time && window_time > time_upper_limit)
 						{
 							printf("prediction invalid\r\n");
@@ -265,7 +265,7 @@ int main(void)
 					}
 					else
 					{
-		           	     cyhal_gpio_write(CYBSP_USER_LED,1);
+		           	     cyhal_gpio_write(CYBSP_USER_LED,0);
 					}
 				}
             }
